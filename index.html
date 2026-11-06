@@ -54,7 +54,11 @@ html{-webkit-text-size-adjust:100%}button{min-height:44px}
 .av{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);vertical-align:middle}.av.big{width:72px;height:72px;display:block;margin:8px 0}.av[hidden]{display:none}
 .err{color:#ff8a98;font-size:14px;margin:8px 0 0}label{display:block;margin-top:10px;font-size:14px;color:var(--mut)}
 .ck{display:flex;align-items:center;font-size:14px}.ck input{width:auto;margin:0 8px 0 0}input[type=file]{padding:8px}
-.hero.lg{height:40vh;height:max(220px,calc(100dvh - 430px))}
+.hero.lg{height:48vh;height:max(240px,calc(100dvh - 350px))}
+.pw{position:relative;display:block}.pw input{padding-right:48px}
+.eye{position:absolute;right:4px;top:calc(50% + 2px);transform:translateY(-50%);width:auto;min-height:0;margin:0;padding:4px 8px;background:transparent;border:0;box-shadow:none;font-size:20px;line-height:1;text-transform:none}
+.cl{padding:10px 12px}.cl label{margin-top:6px;font-size:13px}.cl input{padding:7px 10px;font-size:15px}.cl button{min-height:36px;padding:7px 12px;margin-top:6px;font-size:13px}
+.cl .eye{margin:0;min-height:0;width:auto;padding:2px 6px;font-size:18px}.cl .pw input{padding-right:44px}
 </style></head><body><div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js"></script>
 <script>
@@ -78,6 +82,7 @@ const hero=(u,h,c)=>`<div class="hero ${c||""}" style="${u?`background-image:url
 const head=()=>`<div class="row"><span class="chip">${S.prof.avatar_url?`<img class="av" src="${pub("avatars",S.prof.avatar_url)}" alt=""> `:""}${esc(S.prof.username)}${S.prem?" · Suscriptor":""}</span><button class="g s" data-a="out">Salir</button></div>`;
 const err=()=>`<p class="err" id="msg">${esc(S.msg)}</p>`;
 
+const pw=(id,ac)=>`<span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="eye" data-a="eye" aria-label="Mostrar contraseña" aria-pressed="false">🙈</button></span>`;
 async function boot(u){
   const{data:p}=await sb.from("profiles").select("*").eq("id",u.id).single();S.prof=p||{id:u.id,username:u.email,role:"user"};
   const{data:s}=await sb.from("subscriptions").select("status,ends_at").eq("user_id",u.id).maybeSingle();
@@ -89,10 +94,10 @@ async function boot(u){
 const V={
 boot:()=>`<p class="m" style="text-align:center;margin-top:40vh">Cargando…</p>`,
 login:async()=>{const u=await site("cover1"),reg=S.tab=="up";return hero(u,`<h1>Tres minutos en el paraíso</h1><p>Lanza el dado, avanza por 40 casillas y cumple lo que te toque.</p>`,"lg")+
-`<div class="card">`+
-(reg?`<label>Usuario<input id="u" autocomplete="username"></label><label>Correo<input id="e" type="email" autocomplete="email"></label><label>Teléfono (opcional)<input id="ph" type="tel" autocomplete="tel"></label><label>Contraseña (mínimo 8 caracteres)<input id="p" type="password" autocomplete="new-password"></label><label>Foto (opcional)<input id="pf" type="file" accept="image/*"></label><img id="pv" class="av big" alt="" hidden><label class="ck"><input id="age" type="checkbox">Soy mayor de 18 años y acepto los términos</label>${err()}<button data-a="reg">Crear cuenta</button><button class="g" data-a="tab" data-v="in">Ya tengo cuenta</button>`
-:`<label>Correo<input id="e" type="email" autocomplete="email"></label><label>Contraseña<input id="p" type="password" autocomplete="current-password"></label>${err()}<button data-a="log">Entrar</button><button class="g" data-a="tab" data-v="up">Crear cuenta</button><button class="g" data-a="forgot">¿Olvidaste tu contraseña?</button>`)+`</div>`},
-reset:()=>`<h2>Nueva contraseña</h2><div class="card"><label>Contraseña nueva (mínimo 8 caracteres)<input id="p" type="password" autocomplete="new-password"></label><button data-a="setpw">Guardar</button>${err()}</div>`,
+`<div class="card cl">`+
+(reg?`<label>Usuario<input id="u" autocomplete="username"></label><label>Correo<input id="e" type="email" autocomplete="email"></label><label>Teléfono (opcional)<input id="ph" type="tel" autocomplete="tel"></label><label>Contraseña (mínimo 8 caracteres)${pw("p","new-password")}</label><label>Foto (opcional)<input id="pf" type="file" accept="image/*"></label><img id="pv" class="av big" alt="" hidden><label class="ck"><input id="age" type="checkbox">Soy mayor de 18 años y acepto los términos</label>${err()}<button data-a="reg">Crear cuenta</button><button class="g" data-a="tab" data-v="in">Ya tengo cuenta</button>`
+:`<label>Correo<input id="e" type="email" autocomplete="email"></label><label>Contraseña${pw("p","current-password")}</label>${err()}<button data-a="log">Entrar</button><button class="g" data-a="tab" data-v="up">Crear cuenta</button><button class="g" data-a="forgot">¿Olvidaste tu contraseña?</button>`)+`</div>`},
+reset:()=>`<h2>Nueva contraseña</h2><div class="card"><label>Contraseña nueva (mínimo 8 caracteres)${pw("p","new-password")}</label><button data-a="setpw">Guardar</button>${err()}</div>`,
 levels:async()=>{const u=await site("cover2");return head()+hero(u,"","h2")+`<div class="lv">${LV.map((l,i)=>{const n=i+1,lk=n>1&&!S.prem;return`<button class="${lk?"lk":""}" data-a="play" data-v="${n}"><span>${lk?"🔒 ":""}Nivel ${n}</span><small>${l} · ${S.prog[n]}/40</small></button>`}).join("")}</div><div class="lv">${SECS.map(s=>`<button class="g" data-a="exp" data-v="${s}">${s}</button>`).join("")}</div>${S.prem?"":`<button class="g" data-a="pay">Ver planes de suscripción</button>`}${isAdm()?`<button class="g" data-a="admin">Panel de administrador</button>`:""}`},
 game:()=>{const p=S.prog[S.lvl],R=S.roll,w=p>=40;return`<div class="row"><button class="g s" data-a="back">‹ Niveles</button><span class="chip">Nivel ${S.lvl} · ${LV[S.lvl-1]}</span></div><div class="card"><div id="dice" class="dice">${R?R.d:"?"}</div><table class="tb"><tr><td class="k">Casilla actual</td><td class="k">Nueva casilla</td></tr><tr><td class="v">${p}</td><td class="v">${R&&R.to?R.to:"–"}</td></tr></table><div class="t" aria-hidden="true">${Array.from({length:40},(_,i)=>{const n=i+1;return`<i class="${n==p?"p":n<p?"v":""} ${locked(S.lvl,n)?"l":""}">${n}</i>`}).join("")}</div>${w?`<h3>¡Llegaste a la casilla 40!</h3><button data-a="reset">Volver a empezar</button>`:(R&&R.to?`<button data-a="ir">IR a la casilla ${R.to}</button>`:`<button id="roll" data-a="roll">Lanzar dado</button>`)+`<button class="g" data-a="reset">Reiniciar nivel</button>`}</div>`},
 card:()=>{const v=S.cv,k=v.c;return`<div class="cv" data-a="ret" role="button" tabindex="0" aria-label="Toca para regresar"><p class="ct">Casilla ${v.n}</p><div class="card rv">${k&&k.img_path?`<img class="c" src="${pub("content",k.img_path)}" alt="Casilla ${v.n}">`:`<div class="ph">🎲</div>`}<p class="tx">${esc(k&&k.txt||"")}</p></div><p class="ct">Toca para volver</p></div>`},
@@ -116,6 +121,7 @@ const redir=()=>location.href.split("#")[0].split("?")[0];
 
 const A={
 tab(v){S.tab=v;S.msg="";draw()},
+eye(v,b){const i=b.parentNode.querySelector("input"),on=i.type=="password";i.type=on?"text":"password";b.textContent=on?"👁️":"🙈";b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",on?"Ocultar contraseña":"Mostrar contraseña")},
 reg:run(async()=>{const u=$("#u").value.trim(),e=$("#e").value.trim(),p=$("#p").value;
  if(!u||!/^\S+@\S+\.\S+$/.test(e)||p.length<8)return msg("Completa usuario, correo y una contraseña de 8 caracteres o más.");
  if(!$("#age").checked)return msg("Debes confirmar que eres mayor de 18 años.");
@@ -147,7 +153,7 @@ savesite:run(async k=>{const t=k=="cover1"?"c1":"c2";if(!S.t[t])return msg("Prim
 secadd:run(async()=>{const t=$("#st").value.trim();if(!t)return $("#st").focus();let p="";if(S.t.sec)p=await up("content","c/"+crypto.randomUUID()+".jpg",S.t.sec);const{error}=await sb.from("section_items").insert({section:S.aS,title:t,descr:$("#sd").value.trim(),extra:$("#sx").value.trim(),img_path:p});if(error)throw error;S.t.sec=null;draw()}),
 secdel:run(async v=>{const{error}=await sb.from("section_items").delete().eq("id",v);if(error)throw error;draw()})
 };
-document.addEventListener("click",e=>{const a=e.target.closest("[data-a]");if(a&&A[a.dataset.a])A[a.dataset.a](a.dataset.v)});
+document.addEventListener("click",e=>{const a=e.target.closest("[data-a]");if(a&&A[a.dataset.a])A[a.dataset.a](a.dataset.v,a)});
 document.addEventListener("keydown",e=>{if((e.key=="Enter"||e.key==" ")&&e.target.matches("b[data-a],.cv")){e.preventDefault();e.target.click()}});
 document.addEventListener("change",async e=>{const i=e.target;if(!i.files||!i.files[0])return;
  if(i.id=="pf"){try{S.t.av=await toJ(i.files[0],256);const p=$("#pv");p.src=S.t.av;p.hidden=false}catch(x){}return}
