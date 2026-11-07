@@ -25,7 +25,11 @@ input,textarea{width:100%;font:inherit;padding:11px;border-radius:12px;border:2p
 .row{display:flex;gap:8px;align-items:center;justify-content:space-between}
 .chip{font-size:13px;font-weight:800;padding:4px 10px;border-radius:99px;background:var(--line)}
 .chip.on{background:var(--gold);color:#0b0b0d}
-.dice{width:92px;height:92px;display:grid;place-items:center;font:900 46px "Playfair Display",Georgia,serif;border-radius:22px;background:linear-gradient(145deg,#f1d77a,#b8901f);color:#0b0b0d;margin:6px auto;box-shadow:0 6px 20px rgba(212,175,55,.35)}
+.dr{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 10px}
+.dice{width:150px;height:150px;object-fit:contain;display:block;margin:0;filter:drop-shadow(0 8px 14px rgba(0,0,0,.7))}
+.sil{height:105px;width:auto;flex:0 0 auto;opacity:.9}
+.card>.t+button{margin-top:30px}
+@media (max-width:360px){.dice{width:118px;height:118px}.sil{height:80px}}
 .dice.r{animation:tm 5s ease-in-out 1}
 @keyframes tm{0%{transform:rotate(0) scale(1)}50%{transform:rotate(900deg) scale(1.18)}100%{transform:rotate(1800deg) scale(1)}}
 @media (prefers-reduced-motion:reduce){.dice.r{animation:none}}
@@ -74,7 +78,7 @@ const Z={1:0,2:0,3:0};
 let S={view:"boot",tab:"in",lvl:1,roll:null,cv:null,sec:null,prof:null,prem:false,msg:"",prog:{...Z},aL:1,sel:1,aS:"Más juegos",t:{}};
 const msg=t=>{S.msg=t;const m=$("#msg");if(m)m.textContent=t};
 const pub=(b,p)=>p?sb.storage.from(b).getPublicUrl(p).data.publicUrl:"";
-const locked=(l,n)=>!S.prem&&(l>1||n>20);
+const locked=(l,n)=>!S.prem&&(l>1||n>15);
 const isAdm=()=>S.prof&&S.prof.role=="admin";
 const saveP=()=>{try{localStorage.setItem("p-"+S.prof.id,JSON.stringify(S.prog))}catch(e){}};
 const toJ=(f,m)=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*k;c.height=i.height*k;c.getContext("2d").drawImage(i,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",.8))};i.onerror=no;i.src=r.result};r.onerror=no;r.readAsDataURL(f)});
@@ -102,7 +106,7 @@ login:async()=>{const u=await site("cover1"),reg=S.tab=="up";return hero(u,`<h1>
 :`<label>Correo<input id="e" type="email" autocomplete="email"></label><label>Contraseña${pw("p","current-password")}</label>${err()}<button data-a="log">Entrar</button><button class="g" data-a="tab" data-v="up">Crear cuenta</button><button class="g" data-a="forgot">¿Olvidaste tu contraseña?</button>`)+`</div>`},
 reset:()=>`<h2>Nueva contraseña</h2><div class="card"><label>Contraseña nueva (mínimo 8 caracteres)${pw("p","new-password")}</label><button data-a="setpw">Guardar</button>${err()}</div>`,
 levels:async()=>{const u=await site("cover2");return head()+hero(u,"","h2")+`<div class="lv">${LV.map((l,i)=>{const n=i+1,lk=n>1&&!S.prem;return`<button class="${lk?"lk":""}" data-a="play" data-v="${n}"><span>${lk?"🔒 ":""}Nivel ${n}</span><small>${l} · ${S.prog[n]}/40</small></button>`}).join("")}</div><div class="lv">${SECS.map(s=>`<button class="g" data-a="exp" data-v="${s}">${s}</button>`).join("")}</div>${S.prem?"":`<button class="g" data-a="pay">Ver planes de suscripción</button>`}${isAdm()?`<button class="g" data-a="admin">Panel de administrador</button>`:""}`},
-game:()=>{const p=S.prog[S.lvl],R=S.roll,w=p>=40;return`<div class="row"><button class="g s" data-a="back">‹ Niveles</button><span class="chip">Nivel ${S.lvl} · ${LV[S.lvl-1]}</span></div><div class="card"><div id="dice" class="dice">${R?R.d:"?"}</div><table class="tb"><tr><td class="k">Casilla actual</td><td class="k">Nueva casilla</td></tr><tr><td class="v">${p}</td><td class="v">${R&&R.to?R.to:"–"}</td></tr></table><div class="t" aria-hidden="true">${Array.from({length:40},(_,i)=>{const n=i+1;return`<i class="${n==p?"p":n<p?"v":""} ${locked(S.lvl,n)?"l":""}">${n}</i>`}).join("")}</div>${w?`<h3>¡Llegaste a la casilla 40!</h3><button data-a="reset">Volver a empezar</button>`:(R&&R.to?`<button data-a="ir">IR a la casilla ${R.to}</button>`:`<button id="roll" data-a="roll">Lanzar dado</button>`)+`<button class="g" data-a="reset">Reiniciar nivel</button>`}</div>`},
+game:()=>{const p=S.prog[S.lvl],R=S.roll,w=p>=40;return`<div class="row"><button class="g s" data-a="back">‹ Niveles</button><span class="chip">Nivel ${S.lvl} · ${LV[S.lvl-1]}</span></div><div class="card"><div class="dr"><img class="sil" src="sil-izq.png" alt=""><img id="dice" class="dice" src="d${R?R.d:1}.png" alt="Dado"><img class="sil" src="sil-der.png" alt=""></div><table class="tb"><tr><td class="k">Casilla actual</td><td class="k">Nueva casilla</td></tr><tr><td class="v">${p}</td><td class="v">${R&&R.to?R.to:"–"}</td></tr></table><div class="t" aria-hidden="true">${Array.from({length:40},(_,i)=>{const n=i+1;return`<i class="${n==p?"p":n<p?"v":""} ${locked(S.lvl,n)?"l":""}">${n}</i>`}).join("")}</div>${w?`<h3>¡Llegaste a la casilla 40!</h3><button data-a="reset">Volver a empezar</button>`:(R&&R.to?`<button data-a="ir">IR a la casilla ${R.to}</button>`:`<button id="roll" data-a="roll">Lanzar dado</button>`)+`<button class="g" data-a="reset">Reiniciar nivel</button>`}</div>`},
 card:()=>{const v=S.cv,k=v.c;return`<div class="cv" data-a="ret" role="button" tabindex="0" aria-label="Toca para regresar"><p class="ct">Casilla ${v.n}</p><div class="card rv">${k&&k.img_path?`<img class="c" src="${pub("content",k.img_path)}" alt="Casilla ${v.n}">`:`<div class="ph">🎲</div>`}<p class="tx">${esc(k&&k.txt||"")}</p></div><p class="ct">Toca para volver</p></div>`},
 sec:async()=>{const{data}=await sb.from("section_items").select("*").eq("section",S.sec).order("position").order("id"),it=data||[];return`<div class="row"><button class="g s" data-a="back">‹ Niveles</button></div><h2>${esc(S.sec)}</h2>${it.length?it.map(i=>`<div class="card">${i.img_path?`<img class="c a" src="${pub("content",i.img_path)}" alt="">`:""}<h3>${esc(i.title)}</h3><p>${esc(i.descr)}</p><span class="chip on">${esc(i.extra)}</span></div>`).join(""):`<p class="m">Aún no hay contenido aquí.</p>`}`},
 admin:async()=>{if(!isAdm())return V.levels();const{data}=await sb.from("cells").select("n,txt,img_path").eq("level",S.aL),ks=data||[],cur=ks.find(k=>k.n==S.sel),img=S.t.cell||(cur&&cur.img_path?pub("content",cur.img_path):"");
@@ -143,7 +147,7 @@ pay(){paywall("Elige un plan para desbloquear todo.")},
 sub(){closeS();sheet(`<h2>Pago</h2><p>Aquí se conectará el pago real. Por ahora tu cuenta no cambia.</p>`)},
 close:closeS,
 reset(){S.prog[S.lvl]=0;S.roll=null;saveP();draw()},
-async roll(){const b=$("#roll"),d=$("#dice");b.disabled=true;d.classList.add("r");const iv=setInterval(()=>{d.textContent=1+Math.floor(Math.random()*6)},70);await new Promise(r=>setTimeout(r,5000));clearInterval(iv);const n=[1,1,2,2,2,3,3,3,4,4,4,5,5,6][Math.floor(Math.random()*14)];S.roll={d:n,to:Math.min(40,S.prog[S.lvl]+n)};draw()},
+async roll(){const b=$("#roll"),d=$("#dice");b.disabled=true;d.classList.add("r");const iv=setInterval(()=>{d.src="d"+(1+Math.floor(Math.random()*6))+".png"},110);await new Promise(r=>setTimeout(r,5000));clearInterval(iv);const n=[1,1,2,2,2,3,3,3,4,4,4,5,5,6][Math.floor(Math.random()*14)];S.roll={d:n,to:Math.min(40,S.prog[S.lvl]+n)};draw()},
 async ir(){const to=S.roll&&S.roll.to;if(!to)return;if(locked(S.lvl,to))return paywall("Terminaste las casillas gratuitas. Suscríbete para seguir hasta la 40.");S.prog[S.lvl]=to;saveP();S.cv={n:to,c:await cell(S.lvl,to)};S.roll={d:S.roll.d,to:null};S.view="card";draw()},
 ret(){S.view="game";S.cv=null;draw()},
 admin(){S.view="admin";S.t={};S.msg="";draw()},
@@ -166,6 +170,7 @@ sb.auth.onAuthStateChange((ev,ses)=>{setTimeout(async()=>{
  if(ses){if(!S.prof||S.prof.id!=ses.user.id)await boot(ses.user);if(["boot","login"].includes(S.view))S.view="levels"}
  else{S.prof=null;S.view="login"}
  draw()},0)});
+["1","2","3","4","5","6"].forEach(n=>{new Image().src="d"+n+".png"});
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 draw();
 </script></body></html>
