@@ -28,9 +28,9 @@ input,textarea{width:100%;font:inherit;padding:11px;border-radius:12px;border:2p
 .dr{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 10px}
 .dice{width:150px;height:150px;object-fit:contain;display:block;margin:0;filter:drop-shadow(0 8px 14px rgba(0,0,0,.7))}
 .sil{height:105px;width:auto;flex:0 0 auto;opacity:.9}
-.sil[src="sil-izq.png"]{height:84px}
+.sil[src="sil-izq.png"]{height:74px}
 .card>.t+button{margin-top:30px}
-@media (max-width:360px){.dice{width:118px;height:118px}.sil{height:80px}.sil[src="sil-izq.png"]{height:64px}}
+@media (max-width:360px){.dice{width:118px;height:118px}.sil{height:80px}.sil[src="sil-izq.png"]{height:56px}}
 .dice.r{animation:tm 5s ease-in-out 1}
 @keyframes tm{0%{transform:rotate(0) scale(1)}50%{transform:rotate(900deg) scale(1.18)}100%{transform:rotate(1800deg) scale(1)}}
 @media (prefers-reduced-motion:reduce){.dice.r{animation:none}}
@@ -69,6 +69,11 @@ html{-webkit-text-size-adjust:100%}button{min-height:44px}
 .cl{padding:10px 12px}.cl label{margin-top:6px;font-size:12px}.cl input{padding:7px 10px;font-size:15px}.cl button{min-height:34px;padding:6px 12px;margin-top:6px;font-size:11px;letter-spacing:.06em}
 .cl .eye{margin:0;min-height:0;width:auto;padding:2px 6px;font-size:18px}.cl .pw input{padding-right:44px}
 .two{display:flex;gap:8px}.cl .two button{flex:1;margin-top:6px;font-size:10px;letter-spacing:.03em;line-height:1.15;padding:6px 8px}
+.rl{position:relative;overflow:hidden;border:1px solid var(--gold);border-radius:18px;background:#0b0b0d center/cover no-repeat;min-height:calc(100dvh - 40px)}
+.rl::before{content:"";position:absolute;inset:0;background:rgba(11,11,13,.8)}
+.rb{position:relative;padding:20px 18px}.rb h2{font-size:28px;color:var(--gold);margin:0 0 10px;text-align:center}
+.rb h3{color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-align:center}.rb p{margin:8px 0;font-size:15px}
+button[hidden]{display:none}
 </style></head><body><div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js"></script>
 <script>
@@ -93,6 +98,15 @@ const head=()=>`<div class="row"><span class="chip">${S.prof.avatar_url?`<img cl
 const err=()=>`<p class="err" id="msg">${esc(S.msg)}</p>`;
 
 const pw=(id,ac)=>`<span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="eye" data-a="eye" aria-label="Mostrar contraseña" aria-pressed="false">🙈</button></span>`;
+const DEF_RULES=`3meeP es un juego para parejas swinger que buscan interacción de manera entretenida. Este es un juego presencial y requiere que los participantes compartan cada uno de los movimientos que realicen durante su turno.
+REGLAS
+1. El juego inicia con un trago para todos los participantes.
+2. Deben acatarse todos los castigos del juego.
+3. No cuenta como prenda de vestir: correas, calzados, medias o accesorios.
+4. Gana el juego la primera pareja que logra llegar o pasar la casilla 40.
+DISFRUTEN DEL JUEGO`;
+const fmt=t=>String(t).split("\n").map(l=>l.trim()).filter(Boolean).map(l=>l==l.toUpperCase()&&/[A-ZÁÉÍÓÚÑ]/.test(l)&&!/^\d/.test(l)&&l.length<40?`<h3>${esc(l)}</h3>`:`<p>${esc(l)}</p>`).join("");
+const txt=async k=>{const{data}=await sb.from("site_texts").select("body").eq("key",k).maybeSingle();return data&&data.body};
 async function boot(u){
   const{data:p}=await sb.from("profiles").select("*").eq("id",u.id).single();S.prof=p||{id:u.id,username:u.email,role:"user"};
   const{data:s}=await sb.from("subscriptions").select("status,ends_at").eq("user_id",u.id).maybeSingle();
@@ -107,21 +121,23 @@ login:async()=>{const u=await site("cover1"),reg=S.tab=="up";return hero(u,`<h1>
 `<div class="card cl">`+
 (reg?`<label>Usuario<input id="u" autocomplete="username"></label><label>Correo<input id="e" type="email" autocomplete="email"></label><label>Teléfono (opcional)<input id="ph" type="tel" autocomplete="tel"></label><label>Contraseña (mínimo 8 caracteres)${pw("p","new-password")}</label><label>Foto (opcional)<input id="pf" type="file" accept="image/*"></label><img id="pv" class="av big" alt="" hidden><label class="ck"><input id="age" type="checkbox">Soy mayor de 18 años y acepto los términos</label>${err()}<button data-a="reg">Crear cuenta</button><button class="g" data-a="tab" data-v="in">Ya tengo cuenta</button>`
 :`<label>Correo<input id="e" type="email" autocomplete="email"></label><label>Contraseña${pw("p","current-password")}</label>${err()}<button data-a="log">Entrar</button><div class="two"><button class="g" data-a="tab" data-v="up">Crear cuenta</button><button class="g" data-a="forgot">¿Olvidaste tu contraseña?</button></div>`)+`</div>`},
+rules:async()=>{const u=await site("rules"),t=(await txt("rules"))||DEF_RULES;return`<div class="rl" style="${u?`background-image:url('${u}')`:""}"><div class="rb"><h2>Reglas del juego</h2>${fmt(t)}<p class="m" id="cd" style="text-align:center">Continuar en 5…</p><button id="cont" data-a="cont" hidden>Continuar</button></div></div>`},
 reset:()=>`<h2>Nueva contraseña</h2><div class="card"><label>Contraseña nueva (mínimo 8 caracteres)${pw("p","new-password")}</label><button data-a="setpw">Guardar</button>${err()}</div>`,
 levels:async()=>{const u=await site("cover2");return head()+hero(u,`<h3>Es Hora de Jugar</h3>`,"h2")+`<div class="lv">${LV.map((l,i)=>{const n=i+1,lk=n>1&&!S.prem;return`<button class="${lk?"lk":""}" data-a="play" data-v="${n}"><span>${lk?"🔒 ":""}Nivel ${n}</span><small>${l} · ${S.prog[n]}/40</small></button>`}).join("")}</div><div class="lv">${SECS.map(s=>`<button class="g" data-a="exp" data-v="${s}">${s}</button>`).join("")}</div>${S.prem?"":`<button class="g" data-a="pay">Ver planes de suscripción</button>`}${isAdm()?`<button class="g" data-a="admin">Panel de administrador</button>`:""}`},
 game:()=>{const p=S.prog[S.lvl],R=S.roll,w=p>=40;return`<div class="row"><button class="g s" data-a="back">‹ Niveles</button><span class="chip">Nivel ${S.lvl} · ${LV[S.lvl-1]}</span></div><div class="card"><div class="dr"><img class="sil" src="sil-izq.png" alt=""><img id="dice" class="dice" src="d${R?R.d:1}.png" alt="Dado"><img class="sil" src="sil-der.png" alt=""></div><table class="tb"><tr><td class="k">Casilla actual</td><td class="k">Nueva casilla</td></tr><tr><td class="v">${p}</td><td class="v">${R&&R.to?R.to:"–"}</td></tr></table><div class="t" aria-hidden="true">${Array.from({length:40},(_,i)=>{const n=i+1;return`<i class="${n==p?"p":n<p?"v":""} ${locked(S.lvl,n)?"l":""}">${n}</i>`}).join("")}</div>${w?`<h3>¡Llegaste a la casilla 40!</h3><button data-a="reset">Volver a empezar</button>`:(R&&R.to?`<button data-a="ir">IR a la casilla ${R.to}</button>`:`<button id="roll" data-a="roll">Lanzar dado</button>`)+`<button class="g" data-a="reset">Reiniciar nivel</button>`}</div>`},
 card:()=>{const v=S.cv,k=v.c;return`<div class="cv" data-a="ret" role="button" tabindex="0" aria-label="Toca para regresar"><p class="ct">Casilla ${v.n}</p><div class="card rv">${k&&k.img_path?`<img class="c" src="${pub("content",k.img_path)}" alt="Casilla ${v.n}">`:`<div class="ph">🎲</div>`}<p class="tx">${esc(k&&k.txt||"")}</p></div><p class="ct">Toca para volver</p></div>`},
 sec:async()=>{const{data}=await sb.from("section_items").select("*").eq("section",S.sec).order("position").order("id"),it=data||[];return`<div class="row"><button class="g s" data-a="back">‹ Niveles</button></div><h2>${esc(S.sec)}</h2>${it.length?it.map(i=>`<div class="card">${i.img_path?`<img class="c a" src="${pub("content",i.img_path)}" alt="">`:""}<h3>${esc(i.title)}</h3><p>${esc(i.descr)}</p><span class="chip on">${esc(i.extra)}</span></div>`).join(""):`<p class="m">Aún no hay contenido aquí.</p>`}`},
-admin:async()=>{if(!isAdm())return V.levels();const{data}=await sb.from("cells").select("n,txt,img_path").eq("level",S.aL),ks=data||[],cur=ks.find(k=>k.n==S.sel),img=S.t.cell||(cur&&cur.img_path?pub("content",cur.img_path):"");
+admin:async()=>{if(!isAdm())return V.levels();const rt=(await txt("rules"))||DEF_RULES;const{data}=await sb.from("cells").select("n,txt,img_path").eq("level",S.aL),ks=data||[],cur=ks.find(k=>k.n==S.sel),img=S.t.cell||(cur&&cur.img_path?pub("content",cur.img_path):"");
 const{data:si}=await sb.from("section_items").select("*").eq("section",S.aS).order("position").order("id");
 const pv=(k,x)=>x?`<img class="c a" src="${x}" alt="">`:"",fi=(id,t)=>`<input id="${id}" data-t="${t}" type="file" accept="image/*">`;
 return`<div class="row"><button class="g s" data-a="back">‹ Niveles</button><span class="chip">Administrador</span></div>${err()}<h2>Casillas</h2><div class="row">${[1,2,3].map(n=>`<button class="${S.aL==n?"":"g"} s" data-a="aL" data-v="${n}">Nivel ${n}</button>`).join("")}</div><div class="t">${Array.from({length:40},(_,i)=>`<b class="${ks.some(k=>k.n==i+1)?"f":""} ${S.sel==i+1?"o":""}" data-a="sel" data-v="${i+1}" role="button" tabindex="0">${i+1}</b>`).join("")}</div>
 <div class="card">${pv(0,img)}<label>Imagen de la casilla ${S.sel}${fi("f1","cell")}</label><label>Texto (premio o castigo)<textarea id="txt" rows="3">${esc(cur&&cur.txt||"")}</textarea></label><button data-a="savecell">Guardar casilla</button><button class="g" data-a="delcell">Vaciar casilla</button></div>
 <div class="card"><h3>Portada (pantalla 1)</h3>${pv(0,S.t.c1)}<label>Imagen${fi("f2","c1")}</label><button data-a="savesite" data-v="cover1">Guardar portada</button></div>
 <div class="card"><h3>Imagen de niveles (pantalla 2)</h3>${pv(0,S.t.c2)}<label>Imagen${fi("f3","c2")}</label><button data-a="savesite" data-v="cover2">Guardar imagen</button></div>
+<div class="card"><h3>Pantalla de reglas</h3>${pv(0,S.t.c3)}<label>Imagen de fondo${fi("f5","c3")}</label><button data-a="savesite" data-v="rules">Guardar imagen</button><label>Texto de las reglas<textarea id="rtxt" rows="12">${esc(rt)}</textarea></label><button data-a="saverules">Guardar reglas</button></div>
 <div class="card"><h3>Secciones</h3><div class="lv">${SECS.map(n=>`<button class="${S.aS==n?"":"g"}" data-a="aS" data-v="${n}">${n}</button>`).join("")}</div>${(si||[]).map(i=>`<div class="row"><span>${esc(i.title)} · ${esc(i.extra)}</span><button class="g s" data-a="secdel" data-v="${i.id}">Quitar</button></div>`).join("")}<label>Título<input id="st"></label><label>Descripción<textarea id="sd" rows="2"></textarea></label><label>${S.aS=="Tienda"?"Precio":S.aS=="Eventos"?"Fecha":"Etiqueta"}<input id="sx"></label>${pv(0,S.t.sec)}<label>Imagen (opcional)${fi("f4","sec")}</label><button data-a="secadd">Agregar a ${S.aS}</button></div>`}
 };
-async function draw(){if(S.view=="admin"&&!isAdm())S.view="levels";$("#app").innerHTML=await V[S.view]();window.scrollTo(0,0)}
+async function draw(){if(S.view=="admin"&&!isAdm())S.view="levels";$("#app").innerHTML=await V[S.view]();window.scrollTo(0,0);clearInterval(S.cdi);if(S.view=="rules"){let n=5;const cd=$("#cd"),b=$("#cont");S.cdi=setInterval(()=>{n--;if(n<=0){clearInterval(S.cdi);if(cd)cd.hidden=true;if(b)b.hidden=false}else if(cd)cd.textContent="Continuar en "+n+"…"},1000)}}
 const keep=async f=>{const v={};document.querySelectorAll("#app textarea,#app input:not([type=file])").forEach(x=>{if(x.id)v[x.id]=x.value});await f();await draw();for(const k in v){const x=document.getElementById(k);if(x)x.value=v[k]}};
 const sheet=h=>{const o=document.createElement("div");o.className="ov";o.innerHTML=`<div class="sh" role="dialog" aria-modal="true">${h}<button class="g" data-a="close">Cerrar</button></div>`;document.body.appendChild(o)};
 const closeS=()=>document.querySelectorAll(".ov").forEach(o=>o.remove());
@@ -131,6 +147,8 @@ const redir=()=>location.href.split("#")[0].split("?")[0];
 
 const A={
 tab(v){S.tab=v;S.msg="";draw()},
+cont(){try{sessionStorage.setItem("rs","1")}catch(e){}S.view="levels";draw()},
+saverules:run(async()=>{const b=$("#rtxt").value.trim();if(b){const{error}=await sb.from("site_texts").upsert({key:"rules",body:b});if(error)throw error}else{await sb.from("site_texts").delete().eq("key","rules")}await draw();msg("Reglas guardadas.")}),
 eye(v,b){const i=b.parentNode.querySelector("input"),on=i.type=="password";i.type=on?"text":"password";b.textContent=on?"👁️":"🙈";b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",on?"Ocultar contraseña":"Mostrar contraseña")},
 reg:run(async()=>{const u=$("#u").value.trim(),e=$("#e").value.trim(),p=$("#p").value;
  if(!u||!/^\S+@\S+\.\S+$/.test(e)||p.length<8)return msg("Completa usuario, correo y una contraseña de 8 caracteres o más.");
@@ -142,7 +160,7 @@ reg:run(async()=>{const u=$("#u").value.trim(),e=$("#e").value.trim(),p=$("#p").
 log:run(async()=>{const{error}=await sb.auth.signInWithPassword({email:$("#e").value.trim(),password:$("#p").value});if(error)msg(/confirm/i.test(error.message)?"Confirma tu correo antes de entrar.":"Correo o contraseña incorrectos.")}),
 forgot:run(async()=>{const e=$("#e").value.trim();if(!e)return msg("Escribe tu correo arriba.");const{error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:redir()});msg(error?error.message:"Si el correo existe, te enviamos un enlace para crear una contraseña nueva.")}),
 setpw:run(async()=>{const p=$("#p").value;if(p.length<8)return msg("Mínimo 8 caracteres.");const{error}=await sb.auth.updateUser({password:p});if(error)return msg(error.message);S.view="levels";draw()}),
-out(){sb.auth.signOut()},
+out(){try{sessionStorage.removeItem("rs")}catch(e){}sb.auth.signOut()},
 play(v){v=+v;if(v>1&&!S.prem)return paywall("Los niveles 2 y 3 son para suscriptores.");S.lvl=v;S.roll=null;S.view="game";draw()},
 back(){S.view="levels";draw()},
 exp(v){S.sec=v;S.view="sec";draw()},
@@ -159,7 +177,7 @@ sel(v){S.sel=+v;S.t.cell=null;draw()},
 aS(v){S.aS=v;S.t.sec=null;keep(async()=>{})},
 savecell:run(async()=>{const o=await cell(S.aL,S.sel);let ip=o&&o.img_path||"";if(S.t.cell)ip=await up("content","c/"+crypto.randomUUID()+".jpg",S.t.cell);const{error}=await sb.from("cells").upsert({level:S.aL,n:S.sel,img_path:ip,txt:$("#txt").value.trim()});if(error)throw error;S.t.cell=null;await draw();msg("Casilla guardada.")}),
 delcell:run(async()=>{const{error}=await sb.from("cells").delete().eq("level",S.aL).eq("n",S.sel);if(error)throw error;S.t.cell=null;draw()}),
-savesite:run(async k=>{const t=k=="cover1"?"c1":"c2";if(!S.t[t])return msg("Primero elige una imagen.");const p=await up("content","c/"+crypto.randomUUID()+".jpg",S.t[t]),{error}=await sb.from("site_images").upsert({key:k,img_path:p});if(error)throw error;S.t[t]=null;await draw();msg("Imagen guardada.")}),
+savesite:run(async k=>{const t=k=="cover1"?"c1":k=="cover2"?"c2":"c3";if(!S.t[t])return msg("Primero elige una imagen.");const p=await up("content","c/"+crypto.randomUUID()+".jpg",S.t[t]),{error}=await sb.from("site_images").upsert({key:k,img_path:p});if(error)throw error;S.t[t]=null;await draw();msg("Imagen guardada.")}),
 secadd:run(async()=>{const t=$("#st").value.trim();if(!t)return $("#st").focus();let p="";if(S.t.sec)p=await up("content","c/"+crypto.randomUUID()+".jpg",S.t.sec);const{error}=await sb.from("section_items").insert({section:S.aS,title:t,descr:$("#sd").value.trim(),extra:$("#sx").value.trim(),img_path:p});if(error)throw error;S.t.sec=null;draw()}),
 secdel:run(async v=>{const{error}=await sb.from("section_items").delete().eq("id",v);if(error)throw error;draw()})
 };
@@ -169,10 +187,10 @@ document.addEventListener("dragstart",e=>{if(e.target.tagName=="IMG")e.preventDe
 document.addEventListener("keydown",e=>{if((e.key=="Enter"||e.key==" ")&&e.target.matches("b[data-a],.cv")){e.preventDefault();e.target.click()}});
 document.addEventListener("change",async e=>{const i=e.target;if(!i.files||!i.files[0])return;
  if(i.id=="pf"){try{S.t.av=await toJ(i.files[0],256);const p=$("#pv");p.src=S.t.av;p.hidden=false}catch(x){}return}
- if(i.dataset.t){const m=i.dataset.t=="c1"||i.dataset.t=="c2"?1280:640;try{await keep(async()=>{S.t[i.dataset.t]=await toJ(i.files[0],m)})}catch(x){}}});
+ if(i.dataset.t){const m=/^c[123]$/.test(i.dataset.t)?1280:640;try{await keep(async()=>{S.t[i.dataset.t]=await toJ(i.files[0],m)})}catch(x){}}});
 sb.auth.onAuthStateChange((ev,ses)=>{setTimeout(async()=>{
  if(ev=="PASSWORD_RECOVERY"){S.view="reset";return draw()}
- if(ses){if(!S.prof||S.prof.id!=ses.user.id)await boot(ses.user);if(["boot","login"].includes(S.view))S.view="levels"}
+ if(ses){const nw=!S.prof||S.prof.id!=ses.user.id;if(nw)await boot(ses.user);else if(!["boot","login"].includes(S.view))return;if(["boot","login"].includes(S.view)){let r=0;try{r=sessionStorage.getItem("rs")}catch(e){}S.view=r?"levels":"rules"}}
  else{S.prof=null;S.view="login"}
  draw()},0)});
 ["1","2","3","4","5","6"].forEach(n=>{new Image().src="d"+n+".png"});
