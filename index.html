@@ -42,6 +42,7 @@ input,textarea{width:100%;font:inherit;padding:11px;border-radius:12px;border:2p
 .big{font-size:20px;text-align:center;margin:6px 0}
 img.c{display:block;margin:0 auto;width:auto;max-width:100%;height:auto;max-height:75vh;max-height:max(240px,calc(100dvh - 200px));object-fit:contain;border-radius:12px;border:4px solid var(--gold);padding:3px;background:#0b0b0d;box-shadow:0 0 0 1px #8a6d17,0 0 18px rgba(212,175,55,.45)}
 img.c.a{max-height:50vh}
+img.c{-webkit-touch-callout:none;-webkit-user-drag:none;-webkit-user-select:none;user-select:none;pointer-events:none}
 .card.rv{padding:8px}.rv .ph{height:max(260px,calc(100dvh - 165px))}
 .rv img.c{width:100%;height:max(260px,calc(100dvh - 165px));max-height:none;object-fit:cover}
 .cv{margin:-8px -6px}.card.rv{padding:4px}
@@ -163,6 +164,8 @@ secadd:run(async()=>{const t=$("#st").value.trim();if(!t)return $("#st").focus()
 secdel:run(async v=>{const{error}=await sb.from("section_items").delete().eq("id",v);if(error)throw error;draw()})
 };
 document.addEventListener("click",e=>{const a=e.target.closest("[data-a]");if(a&&A[a.dataset.a])A[a.dataset.a](a.dataset.v,a)});
+document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest(".cv,img.c"))e.preventDefault()});
+document.addEventListener("dragstart",e=>{if(e.target.tagName=="IMG")e.preventDefault()});
 document.addEventListener("keydown",e=>{if((e.key=="Enter"||e.key==" ")&&e.target.matches("b[data-a],.cv")){e.preventDefault();e.target.click()}});
 document.addEventListener("change",async e=>{const i=e.target;if(!i.files||!i.files[0])return;
  if(i.id=="pf"){try{S.t.av=await toJ(i.files[0],256);const p=$("#pv");p.src=S.t.av;p.hidden=false}catch(x){}return}
