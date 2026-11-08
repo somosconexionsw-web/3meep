@@ -102,7 +102,7 @@ async function boot(u){
 
 const V={
 boot:()=>`<p class="m" style="text-align:center;margin-top:40vh">Cargando…</p>`,
-login:async()=>{const u=await site("cover1"),reg=S.tab=="up";return hero(u,`<h1>Tres minutos en el paraíso</h1><p>Lanza el dado, avanza por 40 casillas y cumple lo que te toque.</p>`,"lg")+
+login:async()=>{const u=await site("cover1"),reg=S.tab=="up";return hero(u,`<h1>Tres minutos en el paraíso</h1><p>Lanza el dado, avanza por 40 casillas y cumple con tu castigo.</p>`,"lg")+
 `<div class="card cl">`+
 (reg?`<label>Usuario<input id="u" autocomplete="username"></label><label>Correo<input id="e" type="email" autocomplete="email"></label><label>Teléfono (opcional)<input id="ph" type="tel" autocomplete="tel"></label><label>Contraseña (mínimo 8 caracteres)${pw("p","new-password")}</label><label>Foto (opcional)<input id="pf" type="file" accept="image/*"></label><img id="pv" class="av big" alt="" hidden><label class="ck"><input id="age" type="checkbox">Soy mayor de 18 años y acepto los términos</label>${err()}<button data-a="reg">Crear cuenta</button><button class="g" data-a="tab" data-v="in">Ya tengo cuenta</button>`
 :`<label>Correo<input id="e" type="email" autocomplete="email"></label><label>Contraseña${pw("p","current-password")}</label>${err()}<button data-a="log">Entrar</button><div class="two"><button class="g" data-a="tab" data-v="up">Crear cuenta</button><button class="g" data-a="forgot">¿Olvidaste tu contraseña?</button></div>`)+`</div>`},
