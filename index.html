@@ -28,8 +28,9 @@ input,textarea{width:100%;font:inherit;padding:11px;border-radius:12px;border:2p
 .dr{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 10px}
 .dice{width:150px;height:150px;object-fit:contain;display:block;margin:0;filter:drop-shadow(0 8px 14px rgba(0,0,0,.7))}
 .sil{height:105px;width:auto;flex:0 0 auto;opacity:.9}
+.sil[src="sil-izq.png"]{height:84px}
 .card>.t+button{margin-top:30px}
-@media (max-width:360px){.dice{width:118px;height:118px}.sil{height:80px}}
+@media (max-width:360px){.dice{width:118px;height:118px}.sil{height:80px}.sil[src="sil-izq.png"]{height:64px}}
 .dice.r{animation:tm 5s ease-in-out 1}
 @keyframes tm{0%{transform:rotate(0) scale(1)}50%{transform:rotate(900deg) scale(1.18)}100%{transform:rotate(1800deg) scale(1)}}
 @media (prefers-reduced-motion:reduce){.dice.r{animation:none}}
