@@ -85,7 +85,7 @@ const SB_URL="https://rccemkqoedajczfnmync.supabase.co",SB_KEY="sb_publishable_B
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=s=>document.querySelector(s),esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const LV=["Suave","Picante","Sin filtro"],SECS=["Más juegos","Eventos","Tienda"];
-const PLANS=[["Mensual","4,99 al mes"],["Trimestral","12,99 cada 3 meses"],["Semestral","22,99 cada 6 meses · el mejor precio"]];
+const PLANS=[["Mensual","5,00 al mes"],["Trimestral","13,00 cada 3 meses"],["Semestral","25,00 cada 6 meses · el mejor precio"]];
 const Z={1:0,2:0,3:0};
 let S={view:"boot",tab:"in",lvl:1,roll:null,cv:null,sec:null,prof:null,prem:false,msg:"",prog:{...Z},aL:1,sel:1,aS:"Más juegos",t:{}};
 const msg=t=>{S.msg=t;const m=$("#msg");if(m)m.textContent=t};
